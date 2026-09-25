@@ -1,31 +1,70 @@
-# Cubiko Control Panel firmware patches
+# N0JCG Cubiko Firmware Patches
 
-This repository contains reproducible patch scripts for the Genmitsu Cubiko Control Panel firmware. Original and patched vendor firmware images are not committed; the script validates the exact input image and prints checksums for the generated output.
+This repository contains reproducible patches for the Genmitsu Cubiko V45.2 Control Panel and System Board firmware. The V45.3 patcher generates a matched pair of images and checks that both input files are the expected factory V45.2 binaries before modifying them.
 
-## Height Map defaults (H45.5)
+## V45.3 combined patch
 
-The patch changes the stock Height Map setup defaults to:
+The V45.3 release includes these changes:
 
-- Length: 132 mm (stock 80 mm)
-- Width: 80 mm (stock 60 mm)
-- X sample points: 11 (stock 9)
-- Y sample points: 10 (stock 7)
+- Control Panel Height Map defaults: length **132 mm**, width **80 mm**, **11 X** sample points, and **10 Y** sample points. The override runs when firmware settings are loaded and changes only values that still match the stock defaults, preserving values that have already been customized.
+- Control Panel About screen: displays **V45.3**.
+- System Board probe input: G38.2 selects the **PB14 bed sensor**.
+- System Board `Manual_Spindle_RPM`: raises the accepted maximum from **10000** to **20000 RPM**. It does not change the startup value; the user can set and save that value in firmware settings.
 
-It updates only fields still equal to the stock values, preserving other user settings. Length and width are IEEE-754 values at RAM addresses `0x200002A8` and `0x200002AC`; sample counts are byte values at `0x200002B0` and `0x200002B1`. The Control Panel About screen is tagged `H45.5` so the patched image is identifiable.
+### Important probe behavior
 
-The H45.5 image was loaded on a Cubiko and the requested Height Map defaults were confirmed on the display.
+The System Board probe patch forces G38.2 to use PB14. This disables the PB7 external probe-jack path, including panel probing actions that use PB7. Do not install this patch if you need that external probe input.
 
-### Build
+## Build from factory firmware
 
-Obtain the vendor firmware package from the [SainSmart Cubiko resource page](https://docs.sainsmart.com/article/8f6ypseduj-cubiko) and place its original `Control Panel/firmware.bin` at that path. Then run:
+Place the unmodified factory V45.2 binaries at these paths in the project directory:
 
-```powershell
-python patch_heightmap_defaults.py
+```text
+Control Panel/firmware.bin
+System Board/firmware.bin
 ```
 
-The script writes `out/control-panel-heightmap-H45.5.bin`. It refuses inputs whose SHA-256 or expected hook, code cave, or About strings differ from the analyzed image.
+Edit the configuration constants near the top of `patch_cubiko_v45_3.py` if different Height Map or RPM values are desired. The About version must remain the same character length as the stock version string.
 
-- Expected input SHA-256: `fa36f34e2a92c61a36b2d14d4c96fccde8fc5d0d91e6884d1e00950a7f7980bd`
-- Verified H45.5 output SHA-256: `8759db23c0088dcc3b04f64f6ec6032d4ff5c692cf971e41a33fdb082dfaf57d`
+Run from the repository root:
 
-Install the generated image only as a Control Panel/offline-module update using the controller-side SD slot. Do not use the cabinet slot, which is for the System Board firmware.
+```powershell
+python patch_cubiko_v45_3.py
+```
+
+The script verifies the initial input SHA-256 checksums and the expected patch locations. It writes:
+
+```text
+out/control-panel-V45.3.bin
+out/system-board-V45.3.bin
+```
+
+It prints the resulting SHA-256 checksums for both patched images. Output hashes are informational and are not fixed in the script, so configurable values can be changed.
+
+Factory input SHA-256 values:
+
+| Image | SHA-256 |
+| --- | --- |
+| Control Panel | `fa36f34e2a92c61a36b2d14d4c96fccde8fc5d0d91e6884d1e00950a7f7980bd` |
+| System Board | `8a054bbc7471a08c94fa1ed72551e39ae4b6a22ab9949b9e563a563cb8025d2e` |
+
+Default V45.3 output SHA-256 values:
+
+| Image | SHA-256 |
+| --- | --- |
+| Control Panel | `7a0bac0b00cee38c4514e9f432bb2d1d9ee3284420bfa788bc5a2ac656ac92aa` |
+| System Board | `edf78d73401d1e8623785462126c0825bfa4e0b8a2e1fd9ad65551b8f5bce0f0` |
+
+## Install the firmware
+
+Update one board at a time. Both update files must be named `firmware.bin` at the root of the SD card, so remove the first image before copying the second. Use the correct SD slot for each board:
+
+1. **Control Panel:** copy `out/control-panel-V45.3.bin` to an SD card and rename the copy to `firmware.bin`. Insert it into the SD slot on the **right side of the controller**. Power on and wait for the Control Panel update to complete. Confirm that the About screen displays V45.3.
+2. Power the machine off. Replace the card contents with `out/system-board-V45.3.bin`, named `firmware.bin`. Insert it into the SD slot at the **top right of the CNC cabinet** (System Board slot). Power on and wait for the System Board update to complete.
+3. After both updates, check the Height Map defaults, test the bed probe with the tool clear, and verify that `Manual_Spindle_RPM` accepts the desired value and retains it after saving and rebooting.
+
+Keep the factory images and a recovery copy of each patched image. The patched firmware has been checked for input identity and binary read-back, and the Height Map and RPM behavior has been confirmed on the machine. Test probe behavior carefully after installation.
+
+## Release package
+
+The GitHub release contains a ZIP with both patched binaries, the patch script, this README, and the SHA-256 manifest. The factory firmware binaries are not included in this source repository.
