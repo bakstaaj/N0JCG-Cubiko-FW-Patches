@@ -94,6 +94,17 @@ From the orientation shown in the supplied connector photo, the three-pin laser 
 
 Keep the connector orientation as shown when identifying the pins. The laser connector's 12 V supply is separate from the 4th-axis connector's 24 V V+ pin. Confirm the laser module's voltage and wiring before connecting it.
 
+## Cubiko leveling connector pinout
+
+The two-pin leveling connector is read **from top to bottom** in the stated orientation:
+
+| Position | Signal |
+| --- | --- |
+| Top | GND |
+| Bottom | Probe |
+
+The probe contact is the leveling/probe signal; the upper contact is ground. Confirm the connector orientation before wiring or connecting external equipment.
+
 ## Release package
 
 The GitHub release contains a ZIP with both patched binaries, the patch script, this README, and the SHA-256 manifest. The factory firmware binaries are not included in this source repository.
