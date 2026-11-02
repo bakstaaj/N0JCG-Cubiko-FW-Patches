@@ -65,6 +65,23 @@ Update one board at a time. Both update files must be named `firmware.bin` at th
 
 Keep the factory images and a recovery copy of each patched image. The patched firmware has been checked for input identity and binary read-back, and the Height Map and RPM behavior has been confirmed on the machine. Test probe behavior carefully after installation.
 
+## Cubiko 4th-axis connector pinout
+
+The following pinout was identified from the Cubiko controller-board silkscreen and confirmed on the machine. This is a six-position connector:
+
+| Pin | Signal | Confirmed voltage / label |
+| --- | --- | --- |
+| 1 | V+ | 24 V DC |
+| 2 | GND | Ground |
+| 3 | COM | Board label `COM` |
+| 4 | DIR | Direction signal |
+| 5 | STP | Step signal |
+| 6 | EN | Enable signal |
+
+**Orientation:** Pin 1 (`V+`) is the top contact in the two connector-face photos. In the photo of the labeled controller-board connector, Pin 1 is the rightmost contact. Count the remaining pins in order from Pin 1: `V+`, `GND`, `COM`, `DIR`, `STP`, `EN`.
+
+**Power warning:** `V+` is confirmed as **24 V DC**. Do not mistake it for the 5 V signal logic level specified for the rotary module, and do not connect it to a 5 V input. Verify connector orientation and wiring before plugging in or powering the rotary module.
+
 ## Release package
 
 The GitHub release contains a ZIP with both patched binaries, the patch script, this README, and the SHA-256 manifest. The factory firmware binaries are not included in this source repository.
