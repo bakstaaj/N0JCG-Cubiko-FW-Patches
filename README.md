@@ -82,6 +82,18 @@ The following pinout was identified from the Cubiko controller-board silkscreen 
 
 **Power warning:** `V+` is confirmed as **24 V DC**. Do not mistake it for the 5 V signal logic level specified for the rotary module, and do not connect it to a 5 V input. Verify connector orientation and wiring before plugging in or powering the rotary module.
 
+## Cubiko laser connector pinout
+
+From the orientation shown in the supplied connector photo, the three-pin laser connector is read **from top to bottom** as follows:
+
+| Position | Signal | Voltage / function |
+| --- | --- | --- |
+| Top | PWM | Laser power control signal |
+| Middle | GRND | Ground |
+| Bottom | 12V | 12 V DC supply |
+
+Keep the connector orientation as shown when identifying the pins. The laser connector's 12 V supply is separate from the 4th-axis connector's 24 V V+ pin. Confirm the laser module's voltage and wiring before connecting it.
+
 ## Release package
 
 The GitHub release contains a ZIP with both patched binaries, the patch script, this README, and the SHA-256 manifest. The factory firmware binaries are not included in this source repository.
